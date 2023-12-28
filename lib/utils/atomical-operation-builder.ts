@@ -40,6 +40,7 @@ import {
 } from './atomical-format-helpers';
 import * as ecc from 'tiny-secp256k1';
 import { ECPairFactory, ECPairAPI, TinySecp256k1Interface } from 'ecpair';
+import { writeFileSync } from 'node:fs';
 
 const tinysecp: TinySecp256k1Interface = require('tiny-secp256k1');
 const bitcoin = require('bitcoinjs-lib');
@@ -62,7 +63,10 @@ import { getFundingUtxo } from './select-funding-utxo';
 import { sleeper } from './utils';
 import { witnessStackToScriptWitness } from '../commands/witness_stack_to_script_witness';
 import { IInputUtxoPartial } from '../types/UTXO.interface';
-import { IWalletRecord } from './validate-wallet-storage';
+import {
+	IWalletRecord,
+	validateWalletStorage,
+} from './validate-wallet-storage';
 import { parentPort, Worker } from 'worker_threads';
 
 const ECPair: ECPairAPI = ECPairFactory(tinysecp);
@@ -1040,15 +1044,20 @@ export class AtomicalOperationBuilder {
 				console.log('\nBroadcasting tx...', revealTx.getId());
 				const interTx = psbt.extractTransaction();
 				const rawtx = interTx.toHex();
-				if (!(await this.broadcastWithRetries(rawtx))) {
-					console.log('Error sending', revealTx.getId(), rawtx);
-					throw new Error(
-						'Unable to broadcast reveal transaction after attempts'
-					);
-				} else {
-					console.log('Success sent tx: ', revealTx.getId());
-				}
-				revealTxid = interTx.getId();
+				console.log(rawtx);
+				let w = await validateWalletStorage();
+				writeFileSync('./broad.txt', `${w.funding},${rawtx}`, {
+					encoding: 'utf-8',
+				});
+				// if (!(await this.broadcastWithRetries(rawtx))) {
+				// 	console.log('Error sending', revealTx.getId(), rawtx);
+				// 	throw new Error(
+				// 		'Unable to broadcast reveal transaction after attempts'
+				// 	);
+				// } else {
+				// 	console.log('Success sent tx: ', revealTx.getId());
+				// }
+				// revealTxid = interTx.getId();
 				performBitworkForRevealTx = false; // Done
 			}
 			nonce++;

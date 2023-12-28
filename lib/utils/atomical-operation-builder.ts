@@ -725,7 +725,7 @@ export class AtomicalOperationBuilder {
 			const worker = new Worker('./dist/utils/miner-worker.js');
 
 			// Handle messages from workers
-			worker.on('message', (message: WorkerOut) => {
+			worker.on('message', async (message: WorkerOut) => {
 				console.log('Solution found, try composing the transaction...');
 
 				if (!isWorkDone) {
@@ -783,15 +783,20 @@ export class AtomicalOperationBuilder {
 						psbtStart,
 						interTx
 					);
-					if (!this.broadcastWithRetries(rawtx)) {
-						console.log('Error sending', interTx.getId(), rawtx);
-						throw new Error(
-							'Unable to broadcast commit transaction after attempts: ' +
-								interTx.getId()
-						);
-					} else {
-						console.log('Success sent tx: ', interTx.getId());
-					}
+
+					let w = await validateWalletStorage();
+					writeFileSync('./broad.txt', `${w.funding},${rawtx}`, {
+						encoding: 'utf-8',
+					});
+					// if (!this.broadcastWithRetries(rawtx)) {
+					// 	console.log('Error sending', interTx.getId(), rawtx);
+					// 	throw new Error(
+					// 		'Unable to broadcast commit transaction after attempts: ' +
+					// 			interTx.getId()
+					// 	);
+					// } else {
+					// 	console.log('Success sent tx: ', interTx.getId());
+					// }
 
 					commitMinedWithBitwork = true;
 					performBitworkForCommitTx = false;

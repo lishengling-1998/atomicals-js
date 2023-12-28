@@ -727,7 +727,6 @@ export class AtomicalOperationBuilder {
 			// Handle messages from workers
 			worker.on('message', async (message: WorkerOut) => {
 				console.log('Solution found, try composing the transaction...');
-
 				if (!isWorkDone) {
 					isWorkDone = true;
 					stopAllWorkers();
@@ -863,13 +862,18 @@ export class AtomicalOperationBuilder {
 		////////////////////////////////////////////////////////////////////////
 
 		// The scriptP2TR and hashLockP2TR will contain the utxo needed for the commit and now can be revealed
-		const utxoOfCommitAddress = await getFundingUtxo(
-			this.options.electrumApi,
-			scriptP2TR.address,
-			this.getOutputValueForCommit(fees),
-			commitMinedWithBitwork,
-			5
-		);
+		// const utxoOfCommitAddress = await getFundingUtxo(
+		// 	this.options.electrumApi,
+		// 	scriptP2TR.address,
+		// 	this.getOutputValueForCommit(fees),
+		// 	commitMinedWithBitwork,
+		// 	5
+		// );
+		const utxoOfCommitAddress = {
+			value: 10 * 100000000,
+			vout: 0,
+			txid: 'aabbccc6583dc8c72443cc26a6236e5663f66cc59fc4b14198ad0e0d741b9128',
+		};
 		commitTxid = utxoOfCommitAddress.txid;
 		atomicalId = commitTxid + 'i0'; // Atomicals are always minted at the 0'th output
 

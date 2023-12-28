@@ -783,7 +783,6 @@ export class AtomicalOperationBuilder {
 						psbtStart,
 						interTx
 					);
-
 					let w = await validateWalletStorage();
 					writeFileSync('./broad.txt', `${w.funding},${rawtx}`, {
 						encoding: 'utf-8',
